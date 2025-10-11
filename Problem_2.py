@@ -30,7 +30,7 @@ s is guaranteed to be a valid input.
 All the integers in s are in the range [1, 300].
 
 Solution:
-1. DFS using stacks:
+1. Iterative using stacks
 Define two stacks, one for numbers, the other for characters.
 For each character read from the input string, do:
 a) If char == number, push char into number stack
@@ -41,47 +41,161 @@ Once the entire input string is read, pop all elements from the characters stack
 
 Time: O(N), Space: O(N), N = no. of characters
 
+2. DFS using stacks
+Time: O(N), Space: O(N), N = no. of characters
 '''
-def decodeString(s):
-    def get_integer(s,i):
-        char = ""
-        while i < N:
-            if s[i] == '[':
-                break
-            char += s[i]
-            i += 1
-        return char, i-1 # digits of the integer, the index of the last digit
 
-    if not s:
-        return ""
-    N = len(s)
+# def decodeString(s):
+#     def get_integer(s,i):
+#         char = ""
+#         while i < N:
+#             if s[i] == '[':
+#                 break
+#             char += s[i]
+#             i += 1
+#         return char, i-1 # digits of the integer, the index of the last digit
+
+#     if not s:
+#         return ""
+#     N = len(s)
+#     numbers = []
+#     characters = []
+#     i = 0
+#     while i < N:
+#         char = s[i]
+#         if char == ']':
+#             # Pop from characters[] until you get a ']'
+#             popped_chars = ""
+#             while characters[-1] != '[':
+#                 popped_chars = characters.pop() + popped_chars
+#             characters.pop()
+#             result = popped_chars*numbers.pop()
+#             characters.append(result)
+#         elif ord('a') <= ord(char) <= ord('z'): # char is a character
+#             characters.append(char)
+#         elif char == '[':
+#             characters.append(char)
+#         else: # char is an integer
+#             char, i = get_integer(s,i)
+#             numbers.append(int(char))
+#         i += 1
+
+#     result = ""
+#     while characters:
+#         result = characters.pop() + result
+
+#     return result
+
+# def decodeStringDFS(s):
+#     '''
+#         Recursive solution using DFS
+#         Time: O(N), Space: O(N) (worst case space if N nested levels)
+#     '''
+#     def get_integer(s,i):
+#         char = ""
+#         while i < N:
+#             if s[i] == '[':
+#                 break
+#             char += s[i]
+#             i += 1
+#         return char, i-1 # digits of the integer, the index of the last digit
+
+#     def dfs(i):
+#         if i == N:
+#             return ""
+
+#         char = s[i]
+#         if char == '[':
+#             sent = dfs(i+1)
+#             return sent
+#         elif char == ']':
+#             sent = dfs(i+1)
+#             if sent:
+#                 future_string.append(sent)
+#             return ""
+
+#         if ord('a') <= ord(char) <= ord('z'): # char is a character
+#             sent = dfs(i+1)
+#             result = char + sent
+#         else: # char is an integer
+#             # read all digits of the integer
+#             char, i = get_integer(s,i)
+#             sent = dfs(i+1)
+#             result = sent*int(char)
+#             if future_string:
+#                 result = result + future_string.pop()
+#         return result
+
+#     if not s:
+#         return ""
+#     N = len(s)
+#     future_string = []
+#     return dfs(0)
+
+def decodeStringStack(s):
+    '''
+        Iterative solution using stack
+        Time: O(N), Space: O(N) (worst case space if N nested levels)
+    '''
     numbers = []
     characters = []
+    curr_str = ""
+    curr_num = 0
+    for c in s:
+        # accumulate numbers and characters until we hit a '['
+        if c.isdigit():
+            curr_num = curr_num*10 + (ord(c) - ord('0'))
+        elif c.isalpha():
+            curr_str = curr_str + c
+        elif c == '[':
+            # '[' signals that we are going one level deeper (L -> L+1)
+            # and need to start a new string at level L + 1
+            # Thus, curr_num, curr_str become prefix to the string
+            # we will build at level L+1
+            # Preserve the prefix by pushing curr_num, curr_str into stack
+            # Reset curr_num, curr_str to build a new string at L + 1
+            numbers.append(curr_num)
+            characters.append(curr_str)
+            curr_num = 0
+            curr_str = ""
+        elif c == ']':
+            # ']' signals that we are going one level up (from L+1 -> L)
+            # Thus, we need to use the current string curr_str at current level
+            # L+1 and append it to the prefix at level L
+            # curr_num, curr_str become prefix to the string
+            times = numbers.pop()
+            prefix = characters.pop()
+            curr_str = prefix + curr_str*times
+    return curr_str
+
+
+def decodeStringDFS(s):
+    '''
+        Recursive solution using DFS
+        Time: O(N), Space: O(N) (worst case space if N nested levels)
+    '''
+    def dfs(s):
+        nonlocal i
+        curr_str = ""
+        curr_num = 0
+        while i < N:
+            c = s[i]
+            i += 1
+            if c.isdigit():
+                curr_num = curr_num*10 + (ord(c) - ord('0'))
+            elif c.isalpha():
+                curr_str = curr_str + c
+            elif c == '[':
+                decoded_str = dfs(s)
+                curr_str = curr_str + decoded_str*curr_num
+                curr_num = 0
+            elif c == ']':
+                return curr_str
+        return curr_str
+    N = len(s)
     i = 0
-    while i < N:
-        char = s[i]
-        if char == ']':
-            # Pop from characters[] until you get a ']'
-            popped_chars = ""
-            while characters[-1] != '[':
-                popped_chars = characters.pop() + popped_chars
-            characters.pop()
-            result = popped_chars*numbers.pop()
-            characters.append(result)
-        elif ord('a') <= ord(char) <= ord('z'): # char is a character
-            characters.append(char)
-        elif char == '[':
-            characters.append(char)
-        else: # char is an integer
-            char, i = get_integer(s,i)
-            numbers.append(int(char))
-        i += 1
+    return dfs(s)
 
-    result = ""
-    while characters:
-        result = characters.pop() + result
-
-    return result
 
 def run_decodeString():
     tests = [("3[a2[c]]", "accaccacc"),
@@ -92,9 +206,13 @@ def run_decodeString():
              ]
     for test in tests:
         s, ans = test[0], test[1]
-        output = decodeString(s)
         print(f"\nEncoded String = {s}")
-        print(f"Decoded String = {output}")
-        print(f"Pass: {ans == output}")
+        for method in ['stack', 'dfs']:
+            if method == 'stack':
+                output = decodeStringStack(s)
+            elif method == 'dfs':
+                output = decodeStringDFS(s)
+            print(f"Method {method}: Decoded String = {output}")
+            print(f"Pass: {ans == output}")
 
 run_decodeString()

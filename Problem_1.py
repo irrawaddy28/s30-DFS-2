@@ -35,15 +35,15 @@ Solution:
 1. BFS with mutation of grid matrix
 https://youtu.be/2AZvtk6UThs?t=3897
 
-Time: O(V+E), Space: O(V+E)
+Time: O(MN), Space: O(MN)
 
 2. BFS without mutation of grid matrix (use boolean visited matrix)
 https://youtu.be/2AZvtk6UThs?t=3897
 
-Time: O(V+E), Space: O(V+E)
+Time: O(MN), Space: O(MN)
 
 3. DFS with mutation of grid matrix
-Time: O(V+E), Space: O(V+E)
+Time: O(MN), Space: O(MN)
 '''
 
 from collections import deque
